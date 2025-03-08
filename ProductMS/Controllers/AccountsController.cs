@@ -51,7 +51,109 @@ namespace ProductMS.Controllers
 
 
         }
-        [HttpPost("authenticate")]
+        [HttpPost("login")]
+        public async Task<IActionResult> LoginUser([FromBody] UserForLoginDto userForLogin)
+        {
+           
+            if (userForLogin == null || string.IsNullOrEmpty(userForLogin.Email) || string.IsNullOrEmpty(userForLogin.Password))
+            {
+                return BadRequest("Invalid login data.");
+            }
+
+            
+            var user = await _userManager.FindByEmailAsync(userForLogin.Email);
+            if (user == null)
+            {
+                return Unauthorized(new { ErrorMessage = "Invalid login attempt." });
+            }
+
+            
+            var passwordValid = await _userManager.CheckPasswordAsync(user, userForLogin.Password);
+            if (!passwordValid)
+            {
+                return Unauthorized(new { ErrorMessage = "Invalid login attempt." });
+            }
+
+           
+            var roles = await _userManager.GetRolesAsync(user);  
+            var token = _jwtHandler.CreateToken(user, roles); 
+
+            
+            return Ok(new { Token = token });
+        }
+
+        /* [HttpPost("assign-role")]
+         [Authorize(Roles = "Admin")] 
+         public async Task<IActionResult> AssignRoleToUser([FromBody] AssignRoleDto assignRoleDto)
+         {
+             if (assignRoleDto == null)
+             {
+                 return BadRequest("Invalid data.");
+             }
+
+             var user = await _userManager.FindByEmailAsync(assignRoleDto.Email);
+             if (user == null)
+             {
+                 return NotFound("User not found.");
+             }
+
+
+             var roleExist = await _roleManager.RoleExistsAsync(assignRoleDto.Role);
+             if (!roleExist)
+             {
+                 return BadRequest("Role does not exist.");
+             }
+
+
+             var result = await _userManager.AddToRoleAsync(user, assignRoleDto.Role);
+             if (!result.Succeeded)
+             {
+                 return BadRequest(result.Errors);
+             }
+
+             return Ok(new { Message = "Role assigned successfully." });
+         }*/
+
+
+        
+        [HttpPut("update-profile")]
+        [Authorize]
+        public async Task<IActionResult> UpdateProfile(UpdateUserDto updateUserDto)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            if (currentUser == null)
+            {
+                return Unauthorized();  
+            }
+
+            
+            if (currentUser.Id != User.FindFirst(c => c.Type == "userId")?.Value)
+            {
+                return Forbid();  // If the logged-in user tries to update someone else's profile, return 403 Forbidden
+            }
+
+            // Update the user's information
+            currentUser.FirstName = updateUserDto.FirstName ?? currentUser.FirstName;
+            currentUser.LastName = updateUserDto.LastName ?? currentUser.LastName;
+            currentUser.PhoneNumber = updateUserDto.PhoneNumber ?? currentUser.PhoneNumber;
+            currentUser.Email = updateUserDto.Email ?? currentUser.Email;
+            currentUser.DateOfBirth = updateUserDto.DateOfBirth ?? currentUser.DateOfBirth;
+            currentUser.Gender = updateUserDto.Gender ?? currentUser.Gender;
+
+            var result = await _userManager.UpdateAsync(currentUser);
+
+            if (result.Succeeded)
+            {
+                return Ok(currentUser);  
+            }
+            else
+            {
+                return BadRequest(result.Errors);  
+            }
+        }
+
+            [HttpPost("authenticate")]
         public async Task<IActionResult> Authenticate([FromBody] UserForAuthenticationDto userForAuthentication)
         {
             var user = await _userManager.FindByNameAsync(userForAuthentication.Email!);

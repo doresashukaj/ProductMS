@@ -22,5 +22,11 @@ namespace ProductMS.Entities
         [Required]
         [MaxLength(50)]
         public string? Category { get; set; }
+
+        public string UserId { get; set; }  
+
+       
+        [ForeignKey("UserId")]
+        public User User { get; set; }
     }
 }

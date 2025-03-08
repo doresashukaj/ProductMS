@@ -18,7 +18,10 @@ opts.UseSqlServer(builder.Configuration.GetConnectionString("sqlConnection")));
 
 
 builder.Services.AddIdentity<User, Role>()
-    .AddEntityFrameworkStores<DatabaseContext>();
+    .AddEntityFrameworkStores<DatabaseContext>()
+    .AddDefaultTokenProviders();
+
+
 
 /*builder.Services.AddIdentity<User, IdentityRole>(opt =>
 {
@@ -54,14 +57,28 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("OnlyAdminUsers",
                     policy => policy.RequireRole("Admin"));
+
+    options.AddPolicy("OnlyUsers",
+                    policy => policy.RequireRole("Users"));
 });
+
 
 
 builder.Services.AddSingleton<JwtHandler>();
 
 builder.Services.AddControllers();
 
- 
+var allowedOrigins = builder.Configuration.GetValue<string>("allowedOrigins")!.Split(",");
+
+builder.Services.AddCors(
+    options =>
+    {
+        options.AddDefaultPolicy(policy
+            =>
+        {
+            policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod();
+        });
+    });
 
 var app = builder.Build();
 
@@ -69,6 +86,7 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
 
 app.UseAuthorization();
 
