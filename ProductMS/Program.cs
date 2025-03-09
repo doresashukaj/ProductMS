@@ -68,9 +68,9 @@ builder.Services.AddSingleton<JwtHandler>();
 
 builder.Services.AddControllers();
 
-var allowedOrigins = builder.Configuration.GetValue<string>("allowedOrigins")!.Split(",");
+//var allowedOrigins = builder.Configuration.GetValue<string>("allowedOrigins")!.Split(",");
 
-builder.Services.AddCors(
+/*builder.Services.AddCors(
     options =>
     {
         options.AddDefaultPolicy(policy
@@ -78,7 +78,7 @@ builder.Services.AddCors(
         {
             policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod();
         });
-    });
+    });*/
 
 var app = builder.Build();
 
