@@ -1,0 +1,95 @@
+<div class="mb-4">
+    <h2 class="text-success"> 
+    Create Account
+    </h2>
+    <div>Already have an account?
+    <a routerLink="/login" class="text-decoration-none fw-medium text-success d-inlin-block">Sign In</a>
+</div>
+</div>
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="mb-3">
+        <input type="text" class="form-control bg-body-secondary" placeholder="First Name" formControlName="firstName">
+        <div class="error-feedback text-danger" *ngIf="form.get('firstName')?.touched && form.get('firstName')?.hasError('required')">
+            First name is required.
+          </div>
+          <div class="error-feedback text-danger" *ngIf="form.get('firstName')?.touched && form.get('firstName')?.hasError('minLength')">
+            Name must contains at least 5 characters.
+          </div>
+          <div class="error-feedback text-danger" *ngIf="form.get('firstName')?.touched && form.get('firstName')?.hasError('maxLength')">
+           Name shouldn't contain more than 20 characters.
+          </div>
+       
+        </div>
+    <div class="mb-3">
+        <input  type="text" class="form-control bg-body-secondary" placeholder="Last Name" formControlName="lastName">
+        <div class="error-feedback text-danger" *ngIf="form.get('lastName')?.touched && form.get('lastName')?.hasError('required')">
+            Last Name is required.
+          </div>
+          <div class="error-feedback text-danger" *ngIf="form.get('lastName')?.touched && form.get('lastName')?.hasError('minLength')">
+            Last Name must contains at least 5 characters.
+          </div>
+          <div class="error-feedback text-danger" *ngIf="form.get('lastName')?.touched && form.get('lastName')?.hasError('maxLength')">
+           Last Name shouldn't contain more than 20 characters.
+          </div>
+        
+    </div> 
+    <div class="mb-3">
+        <input  type="email" class="form-control bg-body-secondary" placeholder="Email" formControlName="email">
+        <div class="error-feedback text-danger" *ngIf="form.get('email')?.touched && form.get('email')?.hasError('required')">
+            Email is required.
+          </div>
+          <div class="error-feedback text-danger" *ngIf="form.get('email')?.touched && form.get('email')?.hasError('email')">
+            Please enter a valid email.
+          </div>
+          
+        
+    </div>
+    <div class="mb-3">
+        <input type="tel" class="form-control bg-body-secondary" placeholder="Phone Number" formControlName="phoneNumber">
+        <div class="error-feedback text-danger" *ngIf="form.get('phoneNumber')?.touched && form.get('phoneNumber')?.hasError('required')">
+            Phone Number is required.
+          </div>
+    </div> 
+    <div class="mb-3">
+        <input type="date"  class="form-control bg-body-secondary" placeholder="Date of Birth" formControlName="dateOfBirth">
+        <div class="error-feedback text-danger" *ngIf="form.get('dateOfBirth')?.touched && form.get('dateOfBirth')?.hasError('required')">
+            Date of birth is required.
+          </div>
+    </div> 
+    <div class="form-group">
+        <label for="gender">Gender</label>
+        <select formControlName="gender" class="form-control">
+          <option value="">Select Gender</option>
+          <option *ngFor="let gender of genderOptions" [value]="gender.value">{{ gender.label }}</option>
+        </select>
+        <div *ngIf="hasDisplayableError('gender')" class="text-danger">
+          Gender is required.
+        </div>
+      </div>
+    <div class="mb-3">
+        <input type="password" class="form-control bg-body-secondary" placeholder="Password" formControlName="password">
+        <div class="error-feedback text-danger" *ngIf="form.get('password')?.touched && form.get('password')?.hasError('required')">
+            Please enter your password.
+          </div>
+          <div class="error-feedback text-danger" *ngIf="form.get('password')?.touched && form.get('password')?.hasError('minlength')">
+           At least 8 characters required.
+          </div>
+          <div class="error-feedback text-danger" *ngIf="form.get('password')?.touched && form.get('password')?.hasError('pattern')">
+            Password is required.
+          </div>
+    </div> 
+    <div class="mb-3">
+        <input type="password" class="form-control bg-body-secondary" placeholder="Confirm Password" formControlName="confirmPassword">
+        <div class="error-feedback text-danger" *ngIf="form.get('confirmPassword')?.touched && form.get('confirmPassword')?.hasError('required')">
+            Confirm your password.
+          </div>
+          <div class="error-feedback text-danger" *ngIf="form.get('confirmPassword')?.touched && form.get('confirmPassword')?.hasError('passwordMismatch')">
+            Password doesn't match.
+          </div>
+    </div> 
+    <div class="mt-4">
+        <button type="submit" class="btn btn-success w-100 rounded-3">
+            Register
+        </button>
+    </div>
+    </form>
