@@ -23,10 +23,6 @@ namespace ProductMS.Entities
         [MaxLength(50)]
         public string? Category { get; set; }
 
-        public string UserId { get; set; }  
-
-       
-        [ForeignKey("UserId")]
-        public User User { get; set; }
+        public string? CreatedByUserId { get; set; }
     }
 }

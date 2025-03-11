@@ -1,0 +1,18 @@
+
+.btn-transparent {
+    background-color: transparent;
+    border: 1px solid #000;  
+    color: #000; 
+    font-size: 16px;
+    font-weight: 600;
+    padding: 8px 16px;
+    transition: all 0.3s ease;
+  }
+  
+ 
+  .btn-transparent:hover {
+    background-color: #000;  
+    color: #fff;
+    border-color: #fff;  
+  }
+  

@@ -1,18 +1,19 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../shared/services/auth.service';
-import  { ToastrService } from 'ngx-toastr';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-login',
   standalone: true,
+  encapsulation: ViewEncapsulation.Emulated,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit{
   form: FormGroup; 
   isSubmitted: boolean = false;
 
@@ -28,6 +29,12 @@ export class LoginComponent {
     });
   }
 
+  ngOnInit(): void {
+    if (this.authService.isLoggedIn()) {
+      this.router.navigateByUrl('/dashboard');
+    }
+  }
+
   hasDisplayableError(controlName: string): boolean {
     const control = this.form.get(controlName);
     return Boolean(control?.invalid) && (this.isSubmitted || Boolean(control?.touched));
@@ -35,20 +42,29 @@ export class LoginComponent {
 
   onSubmit() { 
     this.isSubmitted = true;
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      if (this.form.get('email')?.invalid) {
+        this.toastr.error('Please enter a valid email address.', 'Validation Failed');
+      }
+      if (this.form.get('password')?.invalid) {
+        this.toastr.error('Password is required.', 'Validation Failed');
+      }
+      return;
+    }
 
-    this.authService.login(this.form.value).subscribe({  
+    this.authService.login(this.form.value).subscribe({
       next: (response) => {
         console.log('Login successful', response);
-        localStorage.setItem('token', response.token); 
-        this.router.navigate(['/dashboard']);
+        this.authService.setToken(response.token);  // Store the token
+        this.router.navigate(['/products']);  // Redirect to dashboard
+        this.toastr.success('Login successful!', 'Success');
       },
       error: (err) => {
-        if(err.status==400)
-        this.toastr.error('Incorrect email or password.', 'Login failed')
-        else
-        console.error('Login failed', err);
-
+        if (err.status === 400) {
+          alert('An unexpected error occurred. Please try again later.');
+        } else {
+          this.toastr.error('Incorrect email or password.');
+        }
       }
     });
   }

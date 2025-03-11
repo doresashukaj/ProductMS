@@ -1,0 +1,28 @@
+<div class="modal">
+    <div class="modal-content">
+      <h3>Add Product form</h3>
+  
+      <label>Product name*</label>
+      <input type="text" [(ngModel)]="product.name">
+  
+      <label>Product category*</label>
+      <select [(ngModel)]="product.category">
+        <option>Porduct Name</option>
+        <option>Description</option>
+        <option>Price</option>
+        <option>Category</option>
+      </select>
+  
+      <label>Price*</label>
+      <input type="number" [(ngModel)]="product.price">
+  
+      <label>Date*</label>
+      <input type="date" [(ngModel)]="product.date">
+  
+      <div class="buttons">
+        <button (click)="close()">Cancel</button>
+        <button (click)="save()">Save</button>
+      </div>
+    </div>
+  </div>
+  

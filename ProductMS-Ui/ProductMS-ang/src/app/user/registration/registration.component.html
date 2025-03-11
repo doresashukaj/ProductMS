@@ -1,95 +1,90 @@
-<div class="mb-4">
-    <h2 class="text-success"> 
-    Create Account
-    </h2>
-    <div>Already have an account?
-    <a routerLink="/login" class="text-decoration-none fw-medium text-success d-inlin-block">Sign In</a>
-</div>
-</div>
-<form [formGroup]="form" (ngSubmit)="onSubmit()">
-    <div class="mb-3">
-        <input type="text" class="form-control bg-body-secondary" placeholder="First Name" formControlName="firstName">
-        <div class="error-feedback text-danger" *ngIf="form.get('firstName')?.touched && form.get('firstName')?.hasError('required')">
-            First name is required.
-          </div>
-          <div class="error-feedback text-danger" *ngIf="form.get('firstName')?.touched && form.get('firstName')?.hasError('minLength')">
-            Name must contains at least 5 characters.
-          </div>
-          <div class="error-feedback text-danger" *ngIf="form.get('firstName')?.touched && form.get('firstName')?.hasError('maxLength')">
-           Name shouldn't contain more than 20 characters.
-          </div>
-       
-        </div>
-    <div class="mb-3">
-        <input  type="text" class="form-control bg-body-secondary" placeholder="Last Name" formControlName="lastName">
-        <div class="error-feedback text-danger" *ngIf="form.get('lastName')?.touched && form.get('lastName')?.hasError('required')">
-            Last Name is required.
-          </div>
-          <div class="error-feedback text-danger" *ngIf="form.get('lastName')?.touched && form.get('lastName')?.hasError('minLength')">
-            Last Name must contains at least 5 characters.
-          </div>
-          <div class="error-feedback text-danger" *ngIf="form.get('lastName')?.touched && form.get('lastName')?.hasError('maxLength')">
-           Last Name shouldn't contain more than 20 characters.
-          </div>
-        
-    </div> 
-    <div class="mb-3">
-        <input  type="email" class="form-control bg-body-secondary" placeholder="Email" formControlName="email">
-        <div class="error-feedback text-danger" *ngIf="form.get('email')?.touched && form.get('email')?.hasError('required')">
-            Email is required.
-          </div>
-          <div class="error-feedback text-danger" *ngIf="form.get('email')?.touched && form.get('email')?.hasError('email')">
-            Please enter a valid email.
-          </div>
+<div class="container">
+    <div class="row vh-100 align-items-center">
+        <div class="col-xxl-4 offset-xxl-4 col-lg-6 offset-lg-3 col-10 offset-1">
+            <div class="rounded-4 border-0 shadow-lg bg-white" style="min-height: 450px;">
+                <div class="d-flex justify-content-start align-items-center">
           
-        
-    </div>
-    <div class="mb-3">
-        <input type="tel" class="form-control bg-body-secondary" placeholder="Phone Number" formControlName="phoneNumber">
-        <div class="error-feedback text-danger" *ngIf="form.get('phoneNumber')?.touched && form.get('phoneNumber')?.hasError('required')">
-            Phone Number is required.
-          </div>
-    </div> 
-    <div class="mb-3">
-        <input type="date"  class="form-control bg-body-secondary" placeholder="Date of Birth" formControlName="dateOfBirth">
-        <div class="error-feedback text-danger" *ngIf="form.get('dateOfBirth')?.touched && form.get('dateOfBirth')?.hasError('required')">
-            Date of birth is required.
-          </div>
-    </div> 
-    <div class="form-group">
-        <label for="gender">Gender</label>
-        <select formControlName="gender" class="form-control">
-          <option value="">Select Gender</option>
-          <option *ngFor="let gender of genderOptions" [value]="gender.value">{{ gender.label }}</option>
-        </select>
-        <div *ngIf="hasDisplayableError('gender')" class="text-danger">
-          Gender is required.
+                </div>
+                <div class="p-5 w-100">
+                    <div class="mb-4">
+                        <h2 class="text-success">Create Account</h2>
+                        <div>Already have an account?
+                            <a routerLink="/login" class="text-decoration-none fw-medium text-success d-inline-block">Sign In</a>
+                        </div>
+                    </div>
+                    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                        <div class="form-group">
+                          <label for="firstName">First Name</label>
+                          <input id="firstName" type="text" formControlName="firstName" class="form-control" />
+                          <div *ngIf="hasDisplayableError('firstName')" class="text-danger">
+                            First name is required and must be between 1 and 50 characters.
+                          </div>
+                        </div>
+                      
+                        <div class="form-group">
+                          <label for="lastName">Last Name</label>
+                          <input id="lastName" type="text" formControlName="lastName" class="form-control" />
+                          <div *ngIf="hasDisplayableError('lastName')" class="text-danger">
+                            Last name is required and must be between 1 and 50 characters.
+                          </div>
+                        </div>
+                      
+                        <div class="form-group">
+                          <label for="phoneNumber">Phone Number</label>
+                          <input id="phoneNumber" type="text" formControlName="phoneNumber" class="form-control" />
+                          <div *ngIf="hasDisplayableError('phoneNumber')" class="text-danger">
+                            Phone number is required and must be between 10 and 15 digits.
+                          </div>
+                        </div>
+                      
+                        <div class="form-group">
+                          <label for="email">Email</label>
+                          <input id="email" type="email" formControlName="email" class="form-control" />
+                          <div *ngIf="hasDisplayableError('email')" class="text-danger">
+                            A valid email is required.
+                          </div>
+                        </div>
+                      
+                        <div class="form-group">
+                          <label for="dateOfBirth">Date of Birth</label>
+                          <input id="dateOfBirth" type="date" formControlName="dateOfBirth" class="form-control" />
+                          <div *ngIf="hasDisplayableError('dateOfBirth')" class="text-danger">
+                            Date of birth is required.
+                          </div>
+                        </div>
+                      
+                        <div class="form-group">
+                          <label for="gender">Gender</label>
+                          <select id="gender" formControlName="gender" class="form-control">
+                            <option *ngFor="let option of genderOptions" [value]="option.value">{{ option.label }}</option>
+                          </select>
+                          <div *ngIf="hasDisplayableError('gender')" class="text-danger">
+                            Gender is required.
+                          </div>
+                        </div>
+                      
+                        <div class="form-group">
+                          <label for="password">Password</label>
+                          <input id="password" type="password" formControlName="password" class="form-control" />
+                          <div *ngIf="hasDisplayableError('password')" class="text-danger">
+                            Password must meet the required pattern.
+                          </div>
+                        </div>
+                      
+                        <div class="form-group">
+                          <label for="confirmPassword">Confirm Password</label>
+                          <input id="confirmPassword" type="password" formControlName="confirmPassword" class="form-control" />
+                          <div *ngIf="hasDisplayableError('confirmPassword')" class="text-danger">
+                            Passwords must match.
+                          </div>
+                        </div>
+                      
+                        <button type="submit" class="btn btn-primary" [disabled]="isSubmitted">Register</button>
+                      </form>
+                      
+                        </div>
+    
+                </div>
+            </div>
         </div>
-      </div>
-    <div class="mb-3">
-        <input type="password" class="form-control bg-body-secondary" placeholder="Password" formControlName="password">
-        <div class="error-feedback text-danger" *ngIf="form.get('password')?.touched && form.get('password')?.hasError('required')">
-            Please enter your password.
-          </div>
-          <div class="error-feedback text-danger" *ngIf="form.get('password')?.touched && form.get('password')?.hasError('minlength')">
-           At least 8 characters required.
-          </div>
-          <div class="error-feedback text-danger" *ngIf="form.get('password')?.touched && form.get('password')?.hasError('pattern')">
-            Password is required.
-          </div>
-    </div> 
-    <div class="mb-3">
-        <input type="password" class="form-control bg-body-secondary" placeholder="Confirm Password" formControlName="confirmPassword">
-        <div class="error-feedback text-danger" *ngIf="form.get('confirmPassword')?.touched && form.get('confirmPassword')?.hasError('required')">
-            Confirm your password.
-          </div>
-          <div class="error-feedback text-danger" *ngIf="form.get('confirmPassword')?.touched && form.get('confirmPassword')?.hasError('passwordMismatch')">
-            Password doesn't match.
-          </div>
-    </div> 
-    <div class="mt-4">
-        <button type="submit" class="btn btn-success w-100 rounded-3">
-            Register
-        </button>
     </div>
-    </form>

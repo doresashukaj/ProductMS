@@ -1,0 +1,6 @@
+.test {
+    background-image: url('/public/background.jpg');
+    background-size: cover;
+    background-position: center;
+    height: 100vh; /* Ensures it takes up the full viewport height */
+}

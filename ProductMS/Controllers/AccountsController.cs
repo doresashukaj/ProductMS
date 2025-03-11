@@ -17,7 +17,7 @@ namespace ProductMS.Controllers
         private readonly UserManager<User> _userManager;
         private readonly IMapper _mapper;
         private readonly JwtHandler _jwtHandler;
-
+        
 
 
         public AccountsController(UserManager<User> userManager, IMapper mapper, JwtHandler jwtHandler)
@@ -53,34 +53,25 @@ namespace ProductMS.Controllers
         }
         [HttpPost("login")]
         public async Task<IActionResult> LoginUser([FromBody] UserForLoginDto userForLogin)
+
         {
-           
-            if (userForLogin == null || string.IsNullOrEmpty(userForLogin.Email) || string.IsNullOrEmpty(userForLogin.Password))
-            {
-                return BadRequest("Invalid login data.");
-            }
+            if (userForLogin is null)
+                return BadRequest(new { Errors = new[] { "Invalid request." } });
 
-            
             var user = await _userManager.FindByEmailAsync(userForLogin.Email);
-            if (user == null)
+            if (user == null || !await _userManager.CheckPasswordAsync(user, userForLogin.Password))
             {
-                return Unauthorized(new { ErrorMessage = "Invalid login attempt." });
+                return Unauthorized(new { Errors = new[] { "Invalid email or password." } });
             }
 
-            
-            var passwordValid = await _userManager.CheckPasswordAsync(user, userForLogin.Password);
-            if (!passwordValid)
-            {
-                return Unauthorized(new { ErrorMessage = "Invalid login attempt." });
-            }
+            var roles = await _userManager.GetRolesAsync(user);
+            var token = _jwtHandler.CreateToken(user, roles);
 
-           
-            var roles = await _userManager.GetRolesAsync(user);  
-            var token = _jwtHandler.CreateToken(user, roles); 
-
-            
             return Ok(new { Token = token });
         }
+
+
+
 
         /* [HttpPost("assign-role")]
          [Authorize(Roles = "Admin")] 
@@ -115,7 +106,7 @@ namespace ProductMS.Controllers
          }*/
 
 
-        
+
         [HttpPut("update-profile")]
         [Authorize]
         public async Task<IActionResult> UpdateProfile(UpdateUserDto updateUserDto)
@@ -128,12 +119,12 @@ namespace ProductMS.Controllers
             }
 
             
-            if (currentUser.Id != User.FindFirst(c => c.Type == "userId")?.Value)
+            if (currentUser.Id != User.FindFirst(c => c.Type == "Id")?.Value)
             {
-                return Forbid();  // If the logged-in user tries to update someone else's profile, return 403 Forbidden
+                return Forbid();  
             }
 
-            // Update the user's information
+            
             currentUser.FirstName = updateUserDto.FirstName ?? currentUser.FirstName;
             currentUser.LastName = updateUserDto.LastName ?? currentUser.LastName;
             currentUser.PhoneNumber = updateUserDto.PhoneNumber ?? currentUser.PhoneNumber;
@@ -163,8 +154,25 @@ namespace ProductMS.Controllers
             var roles = await _userManager.GetRolesAsync(user);
             var token = _jwtHandler.CreateToken(user, roles);
             return Ok(new AuthResponseDto { IAuthSuccessful = true, Token = token });
-                }
-       
+         }
+
+        [HttpPost("logout")]
+        [Authorize]
+        public async Task<IActionResult> Logout()
+        {
+            var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(id))
+                return Unauthorized();
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+                return Unauthorized();
+
+            return Ok(new { Message = "Logout successful." });
+        }
+
+
 
     }
 }

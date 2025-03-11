@@ -40,7 +40,7 @@ namespace ProductMS.JwTFeatures
         {
             var claims = new List<Claim>
             {
-               new Claim(ClaimTypes.Name, user.UserName),
+               new Claim(ClaimTypes.NameIdentifier, user.Id),
                new Claim("id", user.Id)
             };
             foreach (var role in roles)

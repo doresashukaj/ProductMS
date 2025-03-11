@@ -1,0 +1,40 @@
+/* Make sure the navbar has a uniform height */
+.navbar {
+    height: 60px;
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Adjusting navbar brand/logo size */
+  .navbar-brand img {
+    height: 40px;
+  }
+  
+  /* Style the navbar items */
+  .navbar-nav .nav-item {
+    margin-right: 20px;  /* Add space between navbar items */
+  }
+  
+  /* Make navbar items bolder and add hover effect */
+  .navbar-nav .nav-link {
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .navbar-nav .nav-link:hover {
+    color: #0d6efd;
+  }
+  
+  /* Style the Log Out button */
+  .btn-dark {
+    font-size: 16px;
+    font-weight: 600;
+    padding: 8px 16px;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-dark:hover {
+    background-color: #0056b3;  /* Darken the button on hover */
+  }
+  

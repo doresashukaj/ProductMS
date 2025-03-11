@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ProductMS.DTO;
 using ProductMS.Entities;
+using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 
 namespace ProductMS.Controllers
 {
@@ -12,58 +14,36 @@ namespace ProductMS.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        private readonly DatabaseContext databaseContext;
+        private readonly DatabaseContext _databaseContext;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public ProductController(DatabaseContext databaseContext)
+        public ProductController(DatabaseContext databaseContext, UserManager<IdentityUser> userManager)
         {
-            this.databaseContext = databaseContext;
+            _databaseContext = databaseContext;
+            _userManager = userManager;
         }
 
-        
         [HttpGet]
-        [Authorize]
-        public IActionResult GetAllProduct()
+        [Authorize(Roles = "Admin")]
+        public IActionResult GetAllProducts()
         {
-            var currentUserId = User.Claims.FirstOrDefault(c => c.Type == "userId")?.Value; 
-            if (string.IsNullOrEmpty(currentUserId))
-            {
-                return Unauthorized();
-            }
-
-            
-            if (User.IsInRole("Admin"))
-            {
-                return Ok(databaseContext.Products.ToList());
-            }
-
-            
-            var userProducts = databaseContext.Products.Where(p => p.UserId == currentUserId).ToList();
-            return Ok(userProducts);
+            var allProducts = _databaseContext.Products.ToList();
+            return Ok(allProducts);
         }
 
-      
+       
         [HttpGet("{id:guid}")]
-        [Authorize]
+        [Authorize(Roles = "Admin,User")]
         public IActionResult GetProductById(Guid id)
         {
-            var currentUserId = User.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
-            var product = databaseContext.Products.Find(id);
-
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-         
-            if (User.IsInRole("Admin"))
-            {
-                return Ok(product);
-            }
+            var product = _databaseContext.Products.Find(id);
+            if (product is null) return NotFound();
 
            
-            if (product.UserId != currentUserId)
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (User.IsInRole("User") && product.CreatedByUserId != currentUserId)
             {
-                return Forbid();  
+                return Forbid();
             }
 
             return Ok(product);
@@ -71,99 +51,69 @@ namespace ProductMS.Controllers
 
         
         [HttpPost]
-        [Authorize]
-        public async Task<IActionResult> AddProduct(ProductDto productDto)
+        [Authorize(Roles = "Admin,User")]
+        public IActionResult AddProduct(ProductDto productDto)
         {
-            var currentUserId = User.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
-            if (string.IsNullOrEmpty(currentUserId))
-            {
-                return Unauthorized();
-            }
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var productEntity = new Product()
+            var productEntity = new Product
             {
                 Name = productDto.Name,
                 Description = productDto.Description,
                 Price = productDto.Price,
                 Category = productDto.Category,
-                UserId = currentUserId  
+                CreatedByUserId = currentUserId
             };
 
-            databaseContext.Products.Add(productEntity);
-            await databaseContext.SaveChangesAsync();  
+            _databaseContext.Products.Add(productEntity);
+            _databaseContext.SaveChanges();
 
             return Ok(productEntity);
         }
 
-        
+       
         [HttpPut("{id:guid}")]
-        [Authorize]
-        public async Task<IActionResult> UpdateProduct(Guid id, UpdateProductDto updateProductDto)
+        [Authorize(Roles = "Admin,User")]
+        public IActionResult UpdateProduct(Guid id, UpdateProductDto updateProductDto)
         {
-            var currentUserId = User.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
-            var product = databaseContext.Products.Find(id);
+            var product = _databaseContext.Products.Find(id);
+            if (product is null) return NotFound();
 
-            if (product == null)
-            {
-                return NotFound();
-            }
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            
-            if (User.IsInRole("Admin"))
+            if (User.IsInRole("User") && product.CreatedByUserId != currentUserId)
             {
-                product.Name = updateProductDto.Name;
-                product.Description = updateProductDto.Description;
-                product.Price = updateProductDto.Price;
-                product.Category = updateProductDto.Category;
-            }
-            else if (product.UserId == currentUserId)
-            {
-               
-                product.Name = updateProductDto.Name;
-                product.Description = updateProductDto.Description;
-                product.Price = updateProductDto.Price;
-                product.Category = updateProductDto.Category;
-            }
-            else
-            {
-                return Forbid();  
+                return Forbid();
             }
 
-            await databaseContext.SaveChangesAsync();  
+            product.Name = updateProductDto.Name;
+            product.Description = updateProductDto.Description;
+            product.Price = updateProductDto.Price;
+            product.Category = updateProductDto.Category;
+
+            _databaseContext.SaveChanges();
 
             return Ok(product);
         }
 
-       
+        // Delete a product (Admin or owner only)
         [HttpDelete("{id:guid}")]
-        [Authorize]
-        public async Task<IActionResult> DeleteProduct(Guid id)
+        [Authorize(Roles = "Admin,User")]
+        public IActionResult DeleteProduct(Guid id)
         {
-            var currentUserId = User.Claims.FirstOrDefault(c => c.Type == "userId")?.Value;
-            var product = databaseContext.Products.Find(id);
+            var product = _databaseContext.Products.Find(id);
+            if (product is null) return NotFound();
 
-            if (product == null)
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (User.IsInRole("User") && product.CreatedByUserId != currentUserId)
             {
-                return NotFound();
+                return Forbid();
             }
 
-            
-            if (User.IsInRole("Admin"))
-            {
-                databaseContext.Products.Remove(product);
-                await databaseContext.SaveChangesAsync();  
-                return Ok();
-            }
-
-            
-            if (product.UserId == currentUserId)
-            {
-                databaseContext.Products.Remove(product);
-                await databaseContext.SaveChangesAsync();  
-                return Ok();
-            }
-
-            return Forbid();  
+            _databaseContext.Products.Remove(product);
+            _databaseContext.SaveChanges();
+            return Ok();
         }
     }
 }

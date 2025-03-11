@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using ProductMS.JwTFeatures;
+using Microsoft.AspNetCore.Authorization;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,7 +34,7 @@ builder.Services.AddIdentity<User, Role>()
 )
     .AddEntityFrameworkStores<DatabaseContext>();*/
 
-var jwtSettings = builder.Configuration.GetSection("JwTSettings");
+var _jwtSettings = builder.Configuration.GetSection("JwTSettings");
 builder.Services.AddAuthentication(opt =>
 {
     opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -41,26 +42,35 @@ builder.Services.AddAuthentication(opt =>
 
 }).AddJwtBearer(options =>
 {
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["validIssuer"],
-        ValidAudience = jwtSettings["validAudience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
-        .GetBytes(jwtSettings.GetSection("securityKey").Value))
+        ValidIssuer = _jwtSettings["validIssuer"],
+        ValidAudience = _jwtSettings["validAudience"],
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(_jwtSettings["securityKey"]!)
+        )
     };
 });
+
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("OnlyAdminUsers",
-                    policy => policy.RequireRole("Admin"));
+    options.DefaultPolicy = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme)
+        .RequireAuthenticatedUser()
+        .Build();
 
-    options.AddPolicy("OnlyUsers",
-                    policy => policy.RequireRole("Users"));
+    options.AddPolicy("OnlyAdminUsers", policy =>
+        policy.RequireRole("Admin"));
+
+    options.AddPolicy("OnlyUsers", policy =>
+        policy.RequireRole("User"));
 });
+
 
 
 
@@ -68,28 +78,31 @@ builder.Services.AddSingleton<JwtHandler>();
 
 builder.Services.AddControllers();
 
-//var allowedOrigins = builder.Configuration.GetValue<string>("allowedOrigins")!.Split(",");
 
-/*builder.Services.AddCors(
-    options =>
-    {
-        options.AddDefaultPolicy(policy
-            =>
-        {
-            policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod();
-        });
-    });*/
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngular",
+        policy => policy.WithOrigins("https://localhost:4200", "http://localhost:4200")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials()
+                        .WithExposedHeaders("Authorization"));
+});
 
 var app = builder.Build();
 
 
 app.UseHttpsRedirection();
 
-app.UseHttpsRedirection();
+app.UseCors("AllowAngular");
 app.UseAuthentication();
 
+
 app.UseAuthorization();
+
+
 
 app.MapControllers();
 
 app.Run();
+builder.Logging.AddConsole();

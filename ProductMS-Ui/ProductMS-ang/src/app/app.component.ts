@@ -1,13 +1,28 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { UserComponent } from "./user/user.component";
+import { ApplicationConfig, Component, OnInit } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
+import { AuthService } from './shared/services/auth.service';
+import { DashboardComponent } from "./dashboard/dashboard.component"; 
+import { HttpClientModule, provideHttpClient } from '@angular/common/http';
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { routes } from './app.routes';
+
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, UserComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  imports: [RouterOutlet, DashboardComponent],
+  styleUrls: ['./app.component.css']
 })
-export class AppComponent {
-  title = 'ProductMS-ang';
+export class AppComponent implements OnInit {
+  
+  constructor(private authService: AuthService, private router: Router) {}
+
+  ngOnInit(): void {
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/login']);
+    } else {
+      this.router.navigate(['/dashboard']);
+    }
+  }
 }

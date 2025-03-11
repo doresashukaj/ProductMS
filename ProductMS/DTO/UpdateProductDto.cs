@@ -19,6 +19,6 @@ namespace ProductMS.DTO
         [Required]
         public string? Category { get; set; }
 
-        public string? CreatedBy { get; set; }
+     
     }
 }

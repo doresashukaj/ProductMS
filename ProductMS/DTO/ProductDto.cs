@@ -1,6 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace ProductMS.DTO
+
 {
     public class ProductDto
     {
@@ -19,6 +21,6 @@ namespace ProductMS.DTO
         [Required]
         public string? Category { get; set; }
 
-        public string? CreatedBy { get; set; }
+        public string? CreatedByUserId { get; set; }
     }
 }
